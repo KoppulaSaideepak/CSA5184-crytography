@@ -1,0 +1,57 @@
+Write a C program to Encrypt the message “meet me at the usual place at ten rather than eight oclock” using the Hill cipher with the key.
+9 4
+5 7
+a.	Show your calculations and the result.
+b.	Show the calculations for the corresponding decryption of the ciphertext to recover the original plaintext.
+
+PROGRAM :-
+
+import numpy as np
+
+def char_to_num(char):
+    return ord(char) - ord('a')
+
+def num_to_char(num):
+    return chr(num + ord('a'))
+
+def hill_encrypt(plaintext, key):
+    plaintext = plaintext.replace(" ", "").lower()
+    plaintext = "x" * (len(plaintext) % 2 != 0) + plaintext  # Pad if necessary
+    blocks = [plaintext[i:i+2] for i in range(0, len(plaintext), 2)]
+
+    ciphertext = ""
+    for block in blocks:
+        block_matrix = np.array([[char_to_num(block[0]), char_to_num(block[1])]])
+        encrypted_matrix = np.dot(block_matrix, key) % 26
+        ciphertext += num_to_char(encrypted_matrix[0, 0]) + num_to_char(encrypted_matrix[0, 1])
+
+    return ciphertext
+
+def hill_decrypt(ciphertext, key):
+    key_inverse = np.linalg.inv(key)
+    key_inverse = (key_inverse * np.linalg.det(key)).astype(int) % 26
+
+    blocks = [ciphertext[i:i+2] for i in range(0, len(ciphertext), 2)]
+    plaintext = ""
+    for block in blocks:
+        block_matrix = np.array([[char_to_num(block[0]), char_to_num(block[1])]])
+        decrypted_matrix = np.dot(block_matrix, key_inverse) % 26
+        plaintext += num_to_char(decrypted_matrix[0, 0]) + num_to_char(decrypted_matrix[0, 1])
+
+    return plaintext
+
+def main():
+    key = np.array([[9, 4], [5, 7]])
+    plaintext = "meet me at the usual place at ten rather than eight oclock"
+
+    ciphertext = hill_encrypt(plaintext, key)
+    decrypted_text = hill_decrypt(ciphertext, key)
+
+    print("Plaintext:", plaintext)
+    print("Key Matrix:")
+    print(key)
+    print("Ciphertext:", ciphertext)
+    print("Decrypted Text:", decrypted_text)
+
+if __name__ == "__main__":
+    main()
